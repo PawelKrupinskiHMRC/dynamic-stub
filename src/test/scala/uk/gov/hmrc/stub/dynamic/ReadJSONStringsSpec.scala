@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.stub.dynamic
 
-import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.{JsUndefined, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class ReadJSONStringsSpec extends UnitSpec with BeforeAndAfterEach with JsonFormats {
+class ReadJSONStringsSpec extends UnitSpec with JsonFormats {
 
 
   override def endpoint: EndPoint = ???
@@ -30,7 +29,7 @@ class ReadJSONStringsSpec extends UnitSpec with BeforeAndAfterEach with JsonForm
 
   "reading" should {
     "read single values" in {
-      val readList = mapReads(Seq(singleKey, singleKey2))
+      val readList = Config.mapReads(Seq(singleKey, singleKey2))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -43,13 +42,13 @@ class ReadJSONStringsSpec extends UnitSpec with BeforeAndAfterEach with JsonForm
       result.isSuccess shouldBe true
 
       result.get shouldBe Map(
-        singleKey -> StringValue("aValue"),
-        singleKey2 -> StringValue("aValue2")
+        singleKey -> SingleValue("aValue"),
+        singleKey2 -> SingleValue("aValue2")
       )
     }
 
     "not read invalid values" in {
-      val readList = mapReads(Seq(singleKey, singleKey2))
+      val readList = Config.mapReads(Seq(singleKey, singleKey2))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -62,12 +61,12 @@ class ReadJSONStringsSpec extends UnitSpec with BeforeAndAfterEach with JsonForm
       result.isSuccess shouldBe true
 
       result.get shouldBe Map(
-        singleKey2 -> StringValue("aValue2")
+        singleKey2 -> SingleValue("aValue2")
       )
     }
 
     "not read invalid JSON" in {
-      val read = mapReads(Seq(singleKey, singleKey2))
+      val read = Config.mapReads(Seq(singleKey, singleKey2))
       val result = read.reads(JsUndefined(""))
 
       result.isSuccess shouldBe true

@@ -16,11 +16,10 @@
 
 package uk.gov.hmrc.stub.dynamic
 
-import org.scalatest.BeforeAndAfterEach
 import play.api.libs.json.{JsUndefined, Json}
 import uk.gov.hmrc.play.test.UnitSpec
 
-class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonFormats{
+class ReadJSONObjectSpec extends UnitSpec with JsonFormats{
 
 
   override def endpoint: EndPoint = ???
@@ -30,7 +29,7 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
 
   "reading object" should {
     "read object with a single field" in {
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey))))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -49,12 +48,12 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
           List(SingleConfigKey("bla"))
         ) ->
         ObjectValue(Map(
-          singleKey -> StringValue("aValue")
+          singleKey -> SingleValue("aValue")
         )))
     }
 
     "read object with multiple fields" in {
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey, singleKey2))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey, singleKey2))))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -75,14 +74,14 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
           List(SingleConfigKey("bla"), SingleConfigKey("ble"))
         ) ->
           ObjectValue(Map(
-            singleKey -> StringValue("aValue"),
-            singleKey2 -> StringValue("aValue2")
+            singleKey -> SingleValue("aValue"),
+            singleKey2 -> SingleValue("aValue2")
           )))
     }
 
     "read recursive objects" in {
       val innerCollectionKey = ObjectConfigKey("innerObject", Seq(singleKey))
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(innerCollectionKey))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(innerCollectionKey))))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -96,12 +95,12 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
       result.get shouldBe Map(ObjectConfigKey("obj",
         List(ObjectConfigKey("innerObject",List(SingleConfigKey("bla"))))) ->
         ObjectValue(Map(ObjectConfigKey("innerObject", List(SingleConfigKey("bla")))
-          -> ObjectValue(Map(SingleConfigKey("bla") -> StringValue("aValue"))))))
+          -> ObjectValue(Map(SingleConfigKey("bla") -> SingleValue("aValue"))))))
     }
 
     "read list within an object" in {
       val innerCollectionKey = MultiConfigKey("innerCollection", Seq(singleKey))
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(innerCollectionKey))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(innerCollectionKey))))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -115,11 +114,11 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
       result.get shouldBe Map(ObjectConfigKey("obj",
         List(MultiConfigKey("innerCollection",List(SingleConfigKey("bla"))))) ->
         ObjectValue(Map(MultiConfigKey("innerCollection", List(SingleConfigKey("bla")))
-          -> ListValue(List(Map(SingleConfigKey("bla") -> StringValue("aValue")))))))
+          -> ListValue(List(Map(SingleConfigKey("bla") -> SingleValue("aValue")))))))
     }
 
     "when declared value is not provided" in {
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey, singleKey2))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey, singleKey2))))
       val result = readList.reads(Json.parse(
         """
           |{
@@ -134,12 +133,12 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
       result.get shouldBe Map(
         ObjectConfigKey("obj", List(SingleConfigKey("bla"), SingleConfigKey("ble"))) ->
         ObjectValue(Map(
-          singleKey -> StringValue("aValue")
+          singleKey -> SingleValue("aValue")
         )))
     }
 
     "when JSON is undefined" in {
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey))))
       val result = readList.reads(JsUndefined(""))
 
       result.isSuccess shouldBe true
@@ -148,7 +147,7 @@ class ReadJSONObjectSpec extends UnitSpec with BeforeAndAfterEach with JsonForma
     }
 
     "when JSON is invalid" in {
-      val readList = mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey))))
+      val readList = Config.mapReads(Seq(ObjectConfigKey("obj", Seq(singleKey))))
       val result = readList.reads(Json.parse(
         """
           |{

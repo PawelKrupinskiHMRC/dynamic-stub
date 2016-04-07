@@ -16,49 +16,22 @@
 
 package uk.gov.hmrc.stub.dynamic
 
-import java.net.URI
-
-import play.twirl.api.TxtFormat
-
-abstract class UrlTemplate(keys: Set[ConfigKey]) {
-  def isConfiguredFor(expectation: Expectation) = {
-    keys.intersect(expectation.keys) == keys
-  }
-
-  def apply(data: DataSupplier): URI
-
-}
-
-trait EndPoint {
-  def keys: Seq[ConfigKey]
-  def defaults: Map[ConfigKey, ValueType]
-  def bodyTemplate: DataSupplier => TxtFormat.Appendable
-  def urlTemplates: Seq[UrlTemplate]
-}
-
-
-class DataSupplier(data: Map[ConfigKey, ValueType]) {
-  def apply(key: SingleConfigKey): String = data(key).asInstanceOf[StringValue].value
+class DataSupplier(data: Map[ConfigKey[_ <: ValueType], ValueType]) {
+  def apply[T](key: SingleConfigKey[T]): T = data(key).asInstanceOf[SingleValue[T]].value
   def apply(key: ObjectConfigKey): DataSupplier = new DataSupplier(data(key).asInstanceOf[ObjectValue].data)
   def apply(key: MultiConfigKey): Seq[DataSupplier] = data(key).asInstanceOf[ListValue].data.map(new DataSupplier(_))
-  def isDefinedAt(key: ConfigKey): Boolean = data.isDefinedAt(key)
+  def isDefinedAt(key: ConfigKey[_ <: ValueType]): Boolean = data.isDefinedAt(key)
 }
 
 
 sealed trait ValueType
-case class StringValue(value: String) extends ValueType
-case class ObjectValue(data: Map[ConfigKey, ValueType]) extends ValueType
-case class ListValue(data: Seq[Map[ConfigKey, ValueType]]) extends ValueType
-
-sealed trait ConfigKey
-case class SingleConfigKey(name: String) extends ConfigKey
-case class ObjectConfigKey(name: String, children: Seq[ConfigKey]) extends ConfigKey
-case class MultiConfigKey(name: String, children: Seq[ConfigKey]) extends ConfigKey
-
+case class SingleValue[T](value: T) extends ValueType
+case class ObjectValue(data: Map[ConfigKey[_ <: ValueType], ValueType]) extends ValueType
+case class ListValue(data: Seq[Map[ConfigKey[_ <: ValueType], ValueType]]) extends ValueType
 
 case class Expectation(testId: String,
                        endpoint: EndPoint,
-                       data: Map[ConfigKey, ValueType],
+                       data: Map[ConfigKey[_ <: ValueType], ValueType],
                        delay: Option[Long],
                        resultCode: Option[Int],
                        timeToLive: Option[Long]) {
