@@ -28,7 +28,7 @@ trait JsonFormats {
 
     Reads[Expectation] { jv =>
       val testId = (jv \ "testId").as[String]
-      val data = (jv \ "data").as[Map[ConfigKey[_ <: ValueType], ValueType]]
+      val data = (jv \ "data").as[Map[ConfigKey, ValueType]]
       val delay = (jv \ "delay").asOpt[Long]
       val resultCode = (jv \ "resultCode").asOpt[Int]
       val timeToLive = (jv \ "timeToLive").asOpt[Long]

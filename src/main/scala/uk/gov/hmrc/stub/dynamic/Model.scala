@@ -16,22 +16,22 @@
 
 package uk.gov.hmrc.stub.dynamic
 
-class DataSupplier(data: Map[ConfigKey[_ <: ValueType], ValueType]) {
+class DataSupplier(data: Map[ConfigKey, ValueType]) {
   def apply[T](key: SingleConfigKey[T]): T = data(key).asInstanceOf[SingleValue[T]].value
   def apply(key: ObjectConfigKey): DataSupplier = new DataSupplier(data(key).asInstanceOf[ObjectValue].data)
   def apply(key: MultiConfigKey): Seq[DataSupplier] = data(key).asInstanceOf[ListValue].data.map(new DataSupplier(_))
-  def isDefinedAt(key: ConfigKey[_ <: ValueType]): Boolean = data.isDefinedAt(key)
+  def isDefinedAt(key: ConfigKey): Boolean = data.isDefinedAt(key)
 }
 
 
 sealed trait ValueType
 case class SingleValue[T](value: T) extends ValueType
-case class ObjectValue(data: Map[ConfigKey[_ <: ValueType], ValueType]) extends ValueType
-case class ListValue(data: Seq[Map[ConfigKey[_ <: ValueType], ValueType]]) extends ValueType
+case class ObjectValue(data: Map[ConfigKey, ValueType]) extends ValueType
+case class ListValue(data: Seq[Map[ConfigKey, ValueType]]) extends ValueType
 
 case class Expectation(testId: String,
                        endpoint: EndPoint,
-                       data: Map[ConfigKey[_ <: ValueType], ValueType],
+                       data: Map[ConfigKey, ValueType],
                        delay: Option[Long],
                        resultCode: Option[Int],
                        timeToLive: Option[Long]) {
