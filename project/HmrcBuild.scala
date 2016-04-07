@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import play.twirl.sbt.SbtTwirl
 import sbt.Keys._
 import sbt._
 import uk.gov.hmrc.versioning.SbtGitVersioning
@@ -36,6 +37,7 @@ object HmrcBuild extends Build {
       )
     )
     .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
+    .enablePlugins(SbtTwirl)
 }
 
 private object AppDependencies {

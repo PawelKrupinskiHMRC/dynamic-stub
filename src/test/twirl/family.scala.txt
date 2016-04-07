@@ -1,0 +1,13 @@
+@import uk.gov.hmrc.stub.dynamic._
+@import uk.gov.hmrc.stub.dynamic.TestEndpoint._
+
+@(data: DataSupplier)
+{
+  "husband": {"name":"@data(husband)(name)", "age":"@data(husband)(age)"}
+  @if(data.isDefinedAt(wife)) {
+  ,"wife": {"name":"@data(wife)(name)", "age":"@data(wife)(age)"}
+  }
+  @for((child, idx) <- data(children).zipWithIndex) {
+    ,"child-@(idx + 1)":({"name":"@child(name)", "age":"@child(age)"}
+  }
+}
